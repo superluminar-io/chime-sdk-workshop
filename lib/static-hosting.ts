@@ -1,7 +1,6 @@
 import * as path from 'path';
 import {
   CfnOutput,
-  RemovalPolicy,
   aws_cloudfront as cloudfront,
   aws_cloudfront_origins as origins,
   aws_s3 as s3,
@@ -19,10 +18,11 @@ export class StaticHosting extends Construct {
   constructor(scope: Construct, id: string, props: StaticHostingProps) {
     super(scope, id);
 
-    const bucket = new s3.Bucket(this, 'MyFirstBucket', {
-      removalPolicy: RemovalPolicy.DESTROY,
-      autoDeleteObjects: true,
+    const bucket = new s3.Bucket(this, 'chime-sdk-app', {
       websiteIndexDocument: 'index.html',
+      publicReadAccess: true,
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ACLS,
+      accessControl: s3.BucketAccessControl.BUCKET_OWNER_FULL_CONTROL,
     });
 
     // create CloudFront distribution for bucket
@@ -30,6 +30,7 @@ export class StaticHosting extends Construct {
       defaultBehavior: {
         origin: new origins.S3Origin(bucket),
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
       },
       defaultRootObject: 'index.html',
       additionalBehaviors: {
@@ -46,10 +47,11 @@ export class StaticHosting extends Construct {
     });
 
     new s3Deployment.BucketDeployment(this, 'MyFirstDeployment', {
-      sources: [s3Deployment.Source.asset(path.join(__dirname, '../frontend/'))],
+      sources: [s3Deployment.Source.asset(path.join(__dirname, '..', 'react-client', 'build'))],
       destinationBucket: bucket,
       distribution,
       distributionPaths: ['/*'],
+      prune: true,
     });
 
     new CfnOutput(this, 'distributionDomainName', {
