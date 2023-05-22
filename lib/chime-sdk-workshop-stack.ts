@@ -1,6 +1,7 @@
 import { aws_apigateway as apigateway, aws_iam as iam, CfnOutput, Stack, StackProps } from 'aws-cdk-lib';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
+import { StaticHosting } from './static-hosting';
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 export class ChimeSdkWorkshopStack extends Stack {
@@ -32,6 +33,13 @@ export class ChimeSdkWorkshopStack extends Stack {
 
     const hello = api.root.addResource('meetingInfo');
     hello.addMethod('GET', new apigateway.LambdaIntegration(fn));
+
+    // const url = new URL(api.url);
+    new StaticHosting(this, 'static-hosting', {
+      functionUrl: 's0nrv3p6a3.execute-api.eu-central-1.amazonaws.com',
+      originPath: '/Prod',
+      pathPattern: '/meetingInfo',
+    });
 
     new CfnOutput(this, 'apiUrl', {
       value: api.url,
