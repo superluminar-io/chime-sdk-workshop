@@ -67,7 +67,7 @@ const MyApp = () => {
       'for:  ',
       data.Attendee,
     );
-
+    meetingManager.meetingSession?.audioVideo.start();
   };
 
   const leaveMeeting = async () => {
@@ -83,7 +83,7 @@ const MyApp = () => {
             variant="h2"
             description="This is the second workshop App.js build"
           >
-          Amazon Chime SDK React app
+            Amazon Chime SDK React app
           </Header>
         }
       >
