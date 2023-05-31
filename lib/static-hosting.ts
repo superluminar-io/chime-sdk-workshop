@@ -26,7 +26,7 @@ export class StaticHosting extends Construct {
     });
 
     // create CloudFront distribution for bucket
-    const distribution = new cloudfront.Distribution(this, 'MyFirstDistribution', {
+    const distribution = new cloudfront.Distribution(this, 'AppDistribution', {
       defaultBehavior: {
         origin: new origins.S3Origin(bucket),
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
@@ -46,7 +46,7 @@ export class StaticHosting extends Construct {
       },
     });
 
-    new s3Deployment.BucketDeployment(this, 'MyFirstDeployment', {
+    new s3Deployment.BucketDeployment(this, 'ReactDeployment', {
       sources: [s3Deployment.Source.asset(path.join(__dirname, '..', 'react-client', 'build'))],
       destinationBucket: bucket,
       distribution,

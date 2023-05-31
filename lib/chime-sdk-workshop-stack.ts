@@ -3,11 +3,11 @@ import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
 import { StaticHosting } from './static-hosting';
 
-export class ChimeSdkWorkshopStack extends Stack {
+export class ChimeSdkPoCStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    const fn = new NodejsFunction(this, 'chime-sdk-workshop', {});
+    const fn = new NodejsFunction(this, 'chime-sdk-control', {});
     fn.role!.addToPrincipalPolicy(new iam.PolicyStatement({
       actions: [
         'chime:CreateMeeting',
@@ -17,9 +17,8 @@ export class ChimeSdkWorkshopStack extends Stack {
       ],
       resources: ['*'],
     }));
-    const api = new apigateway.RestApi(this, 'chime-sdk-workshop-api', {
-      restApiName: 'chime-sdk-workshop-api',
-      description: 'This is the API for the Chime SDK Workshop',
+    const api = new apigateway.RestApi(this, 'chime-sdk-control-api', {
+      restApiName: 'chime-sdk-control-api',
       defaultCorsPreflightOptions: {
         allowOrigins: apigateway.Cors.ALL_ORIGINS,
         allowMethods: apigateway.Cors.ALL_METHODS,
@@ -33,11 +32,10 @@ export class ChimeSdkWorkshopStack extends Stack {
     const hello = api.root.addResource('meetingInfo');
     hello.addMethod('GET', new apigateway.LambdaIntegration(fn));
 
-    // const url = new URL(api.url);
     new StaticHosting(this, 'static-hosting', {
-      functionUrl: '34tss6g982.execute-api.eu-central-1.amazonaws.com',
-      originPath: '/Prod',
-      pathPattern: '/meetingInfo',
+      functionUrl: `${api.restApiId}.execute-api.${Stack.of(this).region}.${Stack.of(this).urlSuffix}`,
+      originPath: `/${api.deploymentStage.stageName}`,
+      pathPattern: `/${hello.resourceId}`,
     });
 
     new CfnOutput(this, 'apiUrl', {

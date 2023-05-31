@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { ChimeSdkWorkshopStack } from '../lib/chime-sdk-workshop-stack';
+import { ChimeSdkPoCStack } from '../lib/chime-sdk-workshop-stack';
 
 const app = new cdk.App();
-new ChimeSdkWorkshopStack(app, 'ChimeSdkWorkshopStack', {
+new ChimeSdkPoCStack(app, 'ChimeSdkPoCStack', {
   /* If you don't specify 'env', this stack will be environment-agnostic.
    * Account/Region-dependent features and context lookups will not work,
    * but a single synthesized template can be deployed anywhere. */
