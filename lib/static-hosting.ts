@@ -19,16 +19,19 @@ export class StaticHosting extends Construct {
     super(scope, id);
 
     const bucket = new s3.Bucket(this, 'chime-sdk-app', {
-      websiteIndexDocument: 'index.html',
-      publicReadAccess: true,
-      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ACLS,
-      accessControl: s3.BucketAccessControl.BUCKET_OWNER_FULL_CONTROL,
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+    });
+
+    const identity = new cloudfront.OriginAccessIdentity(this, 'OAI', {
+      comment: `OAI for ${bucket.bucketName}`,
     });
 
     // create CloudFront distribution for bucket
     const distribution = new cloudfront.Distribution(this, 'AppDistribution', {
       defaultBehavior: {
-        origin: new origins.S3Origin(bucket),
+        origin: new origins.S3Origin(bucket, {
+          originAccessIdentity: identity,
+        }),
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
       },
